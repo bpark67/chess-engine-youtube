@@ -6,7 +6,7 @@ Driver File
 
 import pygame as p
 from pygame.constants import K_r, K_z
-import ChessEngine
+import ChessEngine, ChessAI
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8 # Dimension of a chess board
@@ -45,14 +45,17 @@ def main():
     sqSelected = () # No selection initially; Keep track of last selection
     playerClicks = [] # Keep track of player clicks. Two tuples: [(6, 4), (4, 4)]
     gameOver = False
+    playerOne = True # If the human is playing white: True
+    playerTwo = False # If the human is playing black: True
     
     while running:
+        humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
             # Mouse handler
             elif e.type == p.MOUSEBUTTONDOWN:
-                if not gameOver:
+                if not gameOver and humanTurn:
                     location = p.mouse.get_pos() # x, y coordinate of the mouse
                     col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
@@ -88,6 +91,14 @@ def main():
                     playerClicks = []
                     moveMade = False
                     animate = False
+
+
+        # AI Move finder logic
+        if not gameOver and not humanTurn:
+            AIMove = ChessAI.findRandomMove(validMoves)
+            gs.makeMove(AIMove)
+            moveMade = True
+            animate = True
 
         if moveMade:
             if animate:
