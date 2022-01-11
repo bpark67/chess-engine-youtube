@@ -54,7 +54,7 @@ class GameState():
             self.board[move.startRow][move.endCol] = "--"
         # Pawn promotion
         if move.pawnPromotion:
-            promotedPiece = input("Promote to Q, R, B, or N: ")
+            promotedPiece = "Q"
             self.board[move.endRow][move.endCol] = move.pieceMoved[0] + promotedPiece
         if move.castle:
             if move.endCol - move.startCol == 2:
