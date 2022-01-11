@@ -45,7 +45,7 @@ def main():
     sqSelected = () # No selection initially; Keep track of last selection
     playerClicks = [] # Keep track of player clicks. Two tuples: [(6, 4), (4, 4)]
     gameOver = False
-    playerOne = True # If the human is playing white: True
+    playerOne = False # If the human is playing white: True
     playerTwo = False # If the human is playing black: True
     
     while running:
@@ -97,7 +97,7 @@ def main():
 
         # AI Move finder logic
         if not gameOver and not humanTurn:
-            AIMove = ChessAI.findBestMoveMinMax(gs, validMoves)
+            AIMove = ChessAI.findBestMove(gs, validMoves)
             if AIMove is None:
                 AIMove = ChessAI.findRandomMove(validMoves)
             gs.makeMove(AIMove)
