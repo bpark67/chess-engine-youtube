@@ -6,8 +6,10 @@ CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 3
 
+
 def findRandomMove(validMoves):
-    return validMoves[random.randint(0, len(validMoves)-1)]
+    return validMoves[random.randint(0, len(validMoves) - 1)]
+
 
 """
 Min Max w/o recursion
@@ -49,26 +51,30 @@ Min Max w/o recursion
 Helper Method to make first recursive call
 """
 
+
 def findBestMove(gs, validMoves):
     global nextMove, counter
     nextMove = None
     random.shuffle(validMoves)
     counter = 0
-    findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+    findMoveNegaMaxAlphaBeta(
+        gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1
+    )
     print(counter)
     return nextMove
+
 
 def findMoveMinMax(gs, validMoves, depth, whiteToMove):
     global nextMove
     if depth == 0:
         return scoreMaterial(gs.board)
-    
+
     if whiteToMove:
         maxScore = -CHECKMATE
         for move in validMoves:
             gs.makeMove(move)
             nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth-1, False)
+            score = findMoveMinMax(gs, nextMoves, depth - 1, False)
             if score > maxScore:
                 maxScore = score
                 if depth == DEPTH:
@@ -80,14 +86,15 @@ def findMoveMinMax(gs, validMoves, depth, whiteToMove):
         for move in validMoves:
             gs.makeMove(move)
             nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth-1, True)
+            score = findMoveMinMax(gs, nextMoves, depth - 1, True)
             if score < minScore:
                 minScore = score
                 if depth == DEPTH:
                     nextMove = move
             gs.undoMove()
         return minScore
-    
+
+
 def findMoveNegaMax(gs, validMoves, depth, turnMultiplier):
     global nextMove
     if depth == 0:
@@ -97,7 +104,7 @@ def findMoveNegaMax(gs, validMoves, depth, turnMultiplier):
     for move in validMoves:
         gs.makeMove(move)
         nextMove = gs.getValidMoves()
-        score = - findMoveNegaMax(gs, nextMove, depth-1, -turnMultiplier)
+        score = -findMoveNegaMax(gs, nextMove, depth - 1, -turnMultiplier)
         if score > maxScore:
             maxScore = score
             if depth == DEPTH:
@@ -106,25 +113,27 @@ def findMoveNegaMax(gs, validMoves, depth, turnMultiplier):
 
     return maxScore
 
+
 def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier):
     global nextMove, counter
     counter += 1
     if depth == 0:
         return turnMultiplier * scoreBoard(gs)
 
-
     # Move ordering... Evaluate best moves first... We prune out worse branches
     maxScore = -CHECKMATE
     for move in validMoves:
         gs.makeMove(move)
         nextMoves = gs.getValidMoves()
-        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth-1, -beta, -alpha, -turnMultiplier)
+        score = -findMoveNegaMaxAlphaBeta(
+            gs, nextMoves, depth - 1, -beta, -alpha, -turnMultiplier
+        )
         if score > maxScore:
             maxScore = score
             if depth == DEPTH:
                 nextMove = move
         gs.undoMove()
-        if maxScore > alpha: # Pruning
+        if maxScore > alpha:  # Pruning
             alpha = maxScore
         if alpha >= beta:
             break
@@ -134,8 +143,8 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier)
 """
 A Positive score is good for white
 A Negative score is good for black
-
 """
+
 
 def scoreBoard(gs):
     if gs.checkMate:
@@ -152,12 +161,14 @@ def scoreBoard(gs):
                 score += pieceScores[square[1]]
             elif square[0] == "b":
                 score -= pieceScores[square[1]]
-    
+
     return score
+
 
 """
 Score the board based on material
 """
+
 
 def scoreMaterial(board):
     score = 0
@@ -167,5 +178,5 @@ def scoreMaterial(board):
                 score += pieceScores[square[1]]
             elif square[0] == "b":
                 score -= pieceScores[square[1]]
-    
+
     return score
