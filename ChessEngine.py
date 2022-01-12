@@ -30,6 +30,7 @@ class GameState():
         self.checkMate = False
         self.staleMate = False
         self.enPassantPossible = () # Square where en passant can happen
+        self.enPassantPossibleLog = [self.enPassantPossible]
         self.currentCastlingRight = CastleRights(True, True, True, True)
         self.castlingRightsLog = [CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks, self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)]
     
@@ -64,6 +65,8 @@ class GameState():
                 self.board[move.endRow][move.endCol+1] = self.board[move.endRow][move.endCol-2]
                 self.board[move.endRow][move.endCol-2] = "--"    
 
+        self.enPassantPossibleLog.append(self.enPassantPossible )
+
         # Update Castling Rights - If a rook or a king moves
         self.updateCastleRights(move)
         self.castlingRightsLog.append(CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks, self.currentCastlingRight.wqs, self.currentCastlingRight.bqs))
@@ -88,10 +91,9 @@ class GameState():
             if move.enPassant:
                 self.board[move.endRow][move.endCol] = "--"
                 self.board[move.startRow][move.endCol] = move.pieceCaptured
-                self.enPassantPossible = (move.endRow, move.endCol)
-
-            if move.pieceMoved[1] == "p" and abs(move.startRow - move.endRow) == 2:
-                self.enPassantPossible = ()
+                
+            self.enPassantPossibleLog.pop()
+            self.enPassantPossible = self.enPassantPossibleLog[-1]
             
             self.castlingRightsLog.pop()
             newRights = self.castlingRightsLog[-1]
@@ -132,6 +134,20 @@ class GameState():
                 elif move.startCol == 7:
                     self.currentCastlingRight.bks = False
 
+        # When rook is captured
+        if move.pieceCaptured == "wR":
+            if move.endRow == 7:
+                if move.endCol == 0:
+                    self.currentCastlingRight.wqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRight.wks = False
+        elif move.pieceCaptured == "bR":
+            if move.endRow == 0:
+                if move.endCol == 0:
+                    self.currentCastlingRight.bqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRight.bks = False
+
     """
     All moves considering checks... Valid moves
     """
@@ -152,6 +168,7 @@ class GameState():
                 checkRow = check[0]
                 checkCol = check[1]
                 pieceChecking = self.board[checkRow][checkCol]
+                print(pieceChecking)
                 validSquares = []
                 if pieceChecking[1] == "N":
                     validSquares = [(checkRow, checkCol)]
@@ -161,6 +178,7 @@ class GameState():
                         validSquares.append(validSquare)
                         if validSquare[0] == checkRow and validSquare[1] == checkCol:
                             break
+                    print(validSquares)
                 for i in range(len(moves)-1, -1, -1):
                     if moves[i].pieceMoved[1] != "K":
                         if not (moves[i].endRow, moves[i].endCol) in validSquares:
@@ -217,8 +235,8 @@ class GameState():
                             break
                     elif endPiece[0] == enemyColor:
                         type = endPiece[1]
-                        if (0 <= j < 3 and type == "R") or \
-                            (4 <= j < 7 and type == "B") or \
+                        if (0 <= j < 4 and type == "R") or \
+                            (4 <= j < 8 and type == "B") or \
                             (i == 1 and type == "p" and ((enemyColor == "w" and 6 <= j < 7) or (enemyColor == "b" and 4 <= j < 5))) or \
                             (type == "Q") or (i == 1 and type == "K"):
                             if possiblePin == ():
@@ -485,6 +503,7 @@ class Move():
         self.castle = castle
         if enPassant:
             self.pieceCaptured = "bp" if self.pieceMoved == "wp" else "wp"
+        self.isCapture = self.pieceCaptured != "--"
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
     """
     Overriding equals method
@@ -503,4 +522,28 @@ class Move():
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
 
+    # Overriding the str function
+    def __str__(self):
+        if self.castle:
+            return "O-O" if self.endCol == 6 else "O-O-O"
+
+        endSquare = self.getRankFile(self.endRow, self.endCol)
+        if self.pieceMoved[1] == "p":
+            if self.isCapture:
+                if self.pawnPromotion:
+                    return self.colsToFiles[self.startCol] + "x" + endSquare + "=Q"
+                else:
+                    return self.colsToFiles[self.startCol] + "x" + endSquare
+            else:
+                if self.pawnPromotion:
+                    return endSquare + "=Q"
+                else:
+                    return endSquare
+
+        moveString = self.pieceMoved[1]
+        if self.isCapture:
+            moveString += "x"
+        return moveString + endSquare
+
+            
 
