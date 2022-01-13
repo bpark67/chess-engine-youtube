@@ -287,8 +287,8 @@ class GameState:
                                 i == 1
                                 and type == "p"
                                 and (
-                                    (enemyColor == "w" and 6 <= j < 7)
-                                    or (enemyColor == "b" and 4 <= j < 5)
+                                    (enemyColor == "w" and 6 <= j <= 7)
+                                    or (enemyColor == "b" and 4 <= j <= 5)
                                 )
                             )
                             or (type == "Q")
