@@ -123,10 +123,12 @@ def main():
 
         drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)
 
-        if gs.checkMate or gs.staleMate:
+        if gs.checkMate or gs.staleMate or gs.drawByRepetition:
             gameOver = True
             if gs.staleMate:
                 text = "Stalemate"
+            elif gs.drawByRepetition:
+                text = "Threefold Repetition"
             else:
                 text = (
                     "Black wins by Checkmate"
