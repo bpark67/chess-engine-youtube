@@ -60,7 +60,6 @@ def findBestMove(gs, validMoves):
     findMoveNegaMaxAlphaBeta(
         gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1
     )
-    print(counter)
     return nextMove
 
 
