@@ -53,8 +53,8 @@ def main():
     sqSelected = ()  # No selection initially; Keep track of last selection
     playerClicks = []  # Keep track of player clicks. Two tuples: [(6, 4), (4, 4)]
     gameOver = False
-    playerOne = True  # If the human is playing white: True
-    playerTwo = True  # If the human is playing black: True
+    playerOne = False  # If the human is playing white: True
+    playerTwo = False  # If the human is playing black: True
 
     while running:
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
@@ -123,10 +123,12 @@ def main():
 
         drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)
 
-        if gs.checkMate or gs.staleMate:
+        if gs.checkMate or gs.staleMate or gs.drawByRepetition:
             gameOver = True
             if gs.staleMate:
                 text = "Stalemate"
+            elif gs.drawByRepetition:
+                text = "Threefold Repetition"
             else:
                 text = (
                     "Black wins by Checkmate"

@@ -37,6 +37,7 @@ class GameState:
         self.checks = []
         self.checkMate = False
         self.staleMate = False
+        self.drawByRepetition = False
         self.enPassantPossible = ()  # Square where en passant can happen
         self.enPassantPossibleLog = [self.enPassantPossible]
         self.currentCastlingRight = CastleRights(True, True, True, True)
@@ -140,6 +141,7 @@ class GameState:
 
             self.checkMate = False
             self.staleMate = False
+            self.drawByRepetition = False
 
     """
     Update the castle rights; Whether the King or Knight moved
@@ -226,6 +228,14 @@ class GameState:
         else:
             self.checkMate = False
             self.staleMate = False
+        if (
+            len(self.moveLog) >= 10
+            and self.moveLog[-2:] == self.moveLog[-6:-4] == self.moveLog[-10:-8]
+            and self.moveLog[-4:-2] == self.moveLog[-8:-6]
+        ):
+            self.drawByRepetition = True
+        else:
+            self.drawByRepetition = False
 
         if self.whiteToMove:
             self.getCastleMoves(
@@ -472,7 +482,7 @@ class GameState:
                             # outside: Between pawn and border
                             outsideRange = range(c + 2, 8)
                         else:  # King to the right of the pawns
-                            insideRange = range(kingCol - 1, c+1, -1)
+                            insideRange = range(kingCol - 1, c + 1, -1)
                             outsideRange = range(c - 1, -1, -1)
                         for i in insideRange:
                             if self.board[r][i] != "--":
@@ -488,7 +498,10 @@ class GameState:
                     if not attackingPiece or blockingPiece:
                         moves.append(
                             Move(
-                                (r, c), (r + moveAmount, c + 1), self.board, enPassant=True
+                                (r, c),
+                                (r + moveAmount, c + 1),
+                                self.board,
+                                enPassant=True,
                             )
                         )
 

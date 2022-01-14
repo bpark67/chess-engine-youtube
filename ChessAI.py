@@ -2,6 +2,74 @@ import random
 from typing import Counter
 
 pieceScores = {"K": 0, "Q": 9, "B": 3, "N": 3, "p": 1, "R": 5}
+knightScore = [
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 3, 3, 3, 3, 2, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 2, 3, 3, 3, 3, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+]
+bishopScore = [
+    [4, 3, 2, 1, 1, 2, 3, 4],
+    [3, 4, 3, 2, 2, 3, 4, 3],
+    [2, 3, 4, 3, 3, 4, 3, 2],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [2, 3, 4, 3, 3, 4, 3, 2],
+    [3, 4, 3, 2, 2, 3, 4, 3],
+    [4, 3, 2, 1, 1, 2, 3, 4],
+]
+rookScore = [
+    [4, 3, 4, 4, 4, 4, 3, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4],
+    [1, 1, 2, 3, 3, 2, 1, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 1, 2, 3, 3, 2, 1, 1],
+    [4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 3, 4, 4, 4, 4, 3, 4],
+]
+queenScore = [
+    [1, 1, 1, 3, 1, 1, 1, 1],
+    [1, 2, 3, 3, 3, 1, 1, 1],
+    [1, 4, 3, 3, 3, 4, 2, 1],
+    [1, 2, 3, 3, 3, 2, 2, 1],
+    [1, 2, 3, 3, 3, 2, 2, 1],
+    [1, 4, 3, 3, 3, 4, 2, 1],
+    [1, 1, 2, 3, 3, 1, 1, 1],
+    [1, 1, 1, 3, 1, 1, 1, 1],
+]
+wpawnScore = [
+    [9, 9, 9, 9, 9, 9, 9, 9],
+    [8, 8, 8, 8, 8, 8, 8, 8],
+    [3, 4, 5, 6, 6, 5, 4, 3],
+    [2, 3, 4, 5, 5, 4, 3, 2],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [1, 1, 2, 3, 3, 2, 1, 1],
+    [1, 1, 1, 0, 0, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+]
+bpawnScore = [
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 0, 0, 1, 1, 1],
+    [1, 1, 2, 3, 3, 2, 1, 1],
+    [1, 2, 3, 4, 4, 3, 2, 1],
+    [2, 3, 4, 5, 5, 4, 3, 2],
+    [3, 4, 5, 6, 6, 5, 4, 3],
+    [8, 8, 8, 8, 8, 8, 8, 8],
+    [9, 9, 9, 9, 9, 9, 9, 9],
+]
+piecePositionScores = {
+    "N": knightScore,
+    "Q": queenScore,
+    "B": bishopScore,
+    "R": rookScore,
+    "wp": wpawnScore,
+    "bp": bpawnScore,
+}
 CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 3
@@ -151,15 +219,24 @@ def scoreBoard(gs):
             return -CHECKMATE
         else:
             return CHECKMATE
-    elif gs.staleMate:
+    elif gs.staleMate or gs.drawByRepetition:
         return STALEMATE
     score = 0
-    for row in gs.board:
-        for square in row:
-            if square[0] == "w":
-                score += pieceScores[square[1]]
-            elif square[0] == "b":
-                score -= pieceScores[square[1]]
+    for row in range(len(gs.board)):
+        for col in range(len(gs.board[row])):
+            square = gs.board[row][col]
+            if square != "--":
+                # Score it positionally
+                piecePositionScore = 0
+                if square[1] != "K":
+                    if square[1] == "p":
+                        piecePositionScore = piecePositionScores[square][row][col]
+                    else:
+                        piecePositionScore = piecePositionScores[square[1]][row][col]
+                if square[0] == "w":
+                    score += pieceScores[square[1]] + piecePositionScore * 0.1
+                elif square[0] == "b":
+                    score -= pieceScores[square[1]] + piecePositionScore * 0.1
 
     return score
 
